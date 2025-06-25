@@ -30,7 +30,7 @@ export const analyzeText = async (text: string, apiKey: string): Promise<OpenAIR
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        //model: 'gpt-4o',
+        //model: 'gpt-4.1',
         model: 'gpt-4.1',
         messages: [
           {

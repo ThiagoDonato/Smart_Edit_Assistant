@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Editor from './components/Editor';
 import SuggestionOverlay from './components/SuggestionOverlay';
 import ApiKeyInput from './components/ApiKeyInput';
+import FocusSlider from './components/FocusSlider';
 import { analyzeText } from './api';
 import { processTextWithSuggestions } from './utils';
 import { Suggestion, HighlightSpan } from './types';
@@ -15,6 +16,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [focusLevel, setFocusLevel] = useState<1 | 2 | 3>(1);
 
   const derivedText = useMemo(() => spans.map(s => s.text).join(''), [spans]);
 
@@ -106,6 +108,10 @@ function App() {
         {/* API Key Input */}
         <ApiKeyInput apiKey={apiKey} onApiKeyChange={setApiKey} />
 
+        {showOverlay && spans.length > 0 && (
+          <FocusSlider level={focusLevel} onChange={setFocusLevel} />
+        )}
+
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-800">
@@ -150,6 +156,7 @@ function App() {
               spans={spans} 
               onAccept={(id) => handleSuggestionAction(id, 'accept')}
               onReject={(id) => handleSuggestionAction(id, 'reject')}
+              focusLevel={focusLevel}
             />
           ) : (
             <Editor
@@ -189,7 +196,7 @@ function App() {
               </div>
             </div>
             <p className="text-sm text-gray-500 mt-4">
-              Hover over highlighted text to see detailed suggestions
+              Click on a highlight to see details. Use (A) to accept and (R) to reject.
             </p>
           </div>
         )}

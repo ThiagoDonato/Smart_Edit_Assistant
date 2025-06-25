@@ -34,4 +34,45 @@ body {
   background-color: rgba(34, 197, 94, 0.2);
   border-bottom: 2px solid #22C55E;
   cursor: pointer;
+}
+
+/* Custom Slider Styles */
+.focus-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb; /* gray-200 */
+  border-radius: 5px;
+  outline: none;
+  transition: background 0.2s ease-in-out;
+}
+
+.focus-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #3B82F6; /* blue-600 */
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform 0.2s ease-in-out;
+}
+
+.focus-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #3B82F6; /* blue-600 */
+  cursor: pointer;
+  border-radius: 50%;
+  border: none;
+  transition: transform 0.2s ease-in-out;
+}
+
+.focus-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.focus-slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
 } 
