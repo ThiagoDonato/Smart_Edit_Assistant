@@ -2,7 +2,7 @@ import { OpenAIResponse } from './types';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
-const SYSTEM_PROMPT = `You are an expert writing assistant. Your sole task is to identify and suggest specific, necessary improvements to a given text. You must return these suggestions in a structured JSON format.
+const SYSTEM_PROMPT = `You are an expert writing assistant. Your sole task is to identify and suggest specific, necessary improvements to a given text. You must return these suggestions in a structured JSON format. Be bold and proactive in your suggestions, especially for level 3 changes.
 
 **CRITICAL RULES:**
 1.  **Suggest ONLY if a change is needed.** Do not create suggestions for phrases that are already grammatically correct, cohesive, or content-wise sound. If a part of the text is correct, you MUST ignore it.
@@ -10,7 +10,10 @@ const SYSTEM_PROMPT = `You are an expert writing assistant. Your sole task is to
 3.  **The \`original\` must be the precise text to be replaced.** It should be unique enough for programmatic search, but it MUST contain the error or the part needing improvement. Do not use correct phrases as the 'original' text just for context.
 
 For each necessary change, return an object in the \`suggestions\` array with the following keys:
-- \`level\`: 1 (Grammar & Spelling), 2 (Cohesion & Structure), or 3 (Content & Clarity).
+- \`level\`: The category of the suggestion. This is crucial for filtering.
+    - \`1 (Grammar & Spelling)\`: Typos, punctuation, and grammatical errors.
+    - \`2 (Cohesion & Structure)\`: Improving flow, transitions, and sentence structure.
+    - \`3 (Content & Clarity)\`: Major rephrasing of sentences that are grammatically correct but awkwardly phrased, unclear, or verbose. Use this for significant improvements to readability and impact.
 - \`original\`: The exact, original substring from the text that requires correction.
 - \`replacement\`: Your suggested, improved alternative.
 - \`reason\`: A concise explanation for why the change is necessary.
@@ -34,7 +37,7 @@ export const analyzeText = async (text: string, apiKey: string): Promise<OpenAIR
       },
       body: JSON.stringify({
         //model: 'gpt-4.1',
-        model: 'gpt-4.1',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
