@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import Editor from './components/Editor';
 import SuggestionOverlay from './components/SuggestionOverlay';
 import ApiKeyInput from './components/ApiKeyInput';
@@ -12,6 +12,7 @@ function App() {
   const [apiKey, setApiKey] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [spans, setSpans] = useState<HighlightSpan[]>([]);
+  const [history, setHistory] = useState<HighlightSpan[][]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOverlay, setShowOverlay] = useState(false);
@@ -42,6 +43,7 @@ function App() {
       setSuggestions(suggestionsWithState);
       const processedSpans = processTextWithSuggestions(text, suggestionsWithState);
       setSpans(processedSpans);
+      setHistory([]);
       setShowOverlay(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -65,6 +67,7 @@ function App() {
   }, [isCopied]);
 
   const handleSuggestionAction = (id: string, action: 'accept' | 'reject') => {
+    setHistory(currentHistory => [...currentHistory, spans]);
     setSpans(currentSpans => {
       return currentSpans.map(span => {
         if (span.suggestion?.id === id) {
@@ -82,6 +85,33 @@ function App() {
     });
   };
 
+  const handleUndo = useCallback(() => {
+    if (history.length === 0) {
+      return;
+    }
+    const lastState = history[history.length - 1];
+    setSpans(lastState);
+    setHistory(currentHistory => currentHistory.slice(0, -1));
+  }, [history]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === 'u') {
+        const target = event.target as HTMLElement;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+          return;
+        }
+        event.preventDefault();
+        handleUndo();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleUndo]);
+
   const handleEditorChange = (newText: string) => {
     setText(newText);
     // If text changes, the analysis is invalid
@@ -89,6 +119,7 @@ function App() {
       setSuggestions([]);
       setSpans([]);
       setShowOverlay(false);
+      setHistory([]);
     }
   };
 
@@ -125,6 +156,14 @@ function App() {
                 {isCopied ? 'Copied!' : 'Copy'}
               </button>
               
+              <button
+                onClick={handleUndo}
+                disabled={history.length === 0}
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Undo
+              </button>
+
               {suggestions.length > 0 ? (
                 <button
                   onClick={() => setShowOverlay(!showOverlay)}
